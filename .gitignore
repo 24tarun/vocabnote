@@ -1,0 +1,25 @@
+# Python cache files
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+# Database
+db.sqlite3
+
+# Virtual Environment
+myvenv/
+venv/
+env/
+.env/
+.venv/
+myvenv/**
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# IDE settings
+.vscode/
+.idea/

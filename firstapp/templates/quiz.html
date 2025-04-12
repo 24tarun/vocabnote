@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quiz</title>
+</head>
+<body>
+    <h1>Take a Quiz</h1>
+
+    {% if score is none %}
+        <form method="post">
+            {% csrf_token %}
+            <label for="num_questions">How many questions do you want to answer?</label>
+            <input type="number" id="num_questions" name="num_questions" min="1" required>
+            <button type="submit">Start Quiz</button>
+        </form>
+    {% else %}
+        <h2>Your Score: {{ score }} out of {{ total }}</h2>
+        <h3>Your Answers:</h3>
+        <ul>
+            {% for question, answer, correct in results %}
+                <li>
+                    The correct answer for "{{ question }}" is "{{ correct }}".
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if questions %}
+        <form method="post">
+            {% csrf_token %}
+            {% for question in questions %}
+                <div>
+                    <label for="question_{{ forloop.counter }}">What is the meaning of "{{ question.Word }}"?</label>
+                    <input type="text" id="question_{{ forloop.counter }}" name="answers" required>
+                    <input type="hidden" name="correct_answers" value="{{ question.correct_answer }}">
+                    <input type="hidden" name="questions" value="{{ question.Word }}">
+                </div>
+            {% endfor %}
+            <button type="submit">Submit</button>
+        </form>
+    {% endif %}
+</body>
+</html>
