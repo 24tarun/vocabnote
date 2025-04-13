@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'firstapp',
-    'secondapp',
+    #'secondapp',
 ]
 
 MIDDLEWARE = [
@@ -51,7 +51,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'VocabNoteProject.urls'
+ROOT_URLCONF = 'vocabnoteproject.urls'
 
 TEMPLATES = [
     {
@@ -69,7 +69,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'VocabNoteProject.wsgi.application'
+WSGI_APPLICATION = 'vocabnoteproject.wsgi.application'
 
 
 # Database

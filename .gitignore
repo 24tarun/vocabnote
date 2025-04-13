@@ -23,3 +23,6 @@ build/
 # IDE settings
 .vscode/
 .idea/
+
+# Credentials
+creds.json
