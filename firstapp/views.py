@@ -7,7 +7,7 @@ from django import forms
 import random
 
 # Path to your credentials JSON file
-CREDS_FILE =  r"C:\Users\tarun\OneDrive\Coding\credentials\vocabnotecreds.json"
+CREDS_FILE =  "creds.json"
 
 # Define the scope
 SCOPE = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']

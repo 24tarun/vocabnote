@@ -5,7 +5,7 @@ import random
 from utils import enforce_gender_rule, enter_data , capitalize_first_letter, quiz
 
 # Path to the JSON file with the service account credentials
-creds_file = r"D:\coding\VocabNote\credentials\vocabnote-425819-9e3b675a3e5a.json"
+creds_file = "creds.json"
 
 # Define the scope
 scope = [
