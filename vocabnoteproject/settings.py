@@ -9,6 +9,15 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
+# --- BEGIN: Render Secret Files Support ---
+from pathlib import Path
+secret_path = Path('/etc/secrets')
+for key in ['DB_NAME', 'DB_USER', 'DB_PASSWORD', 'DB_HOST', 'DB_PORT', 'DJANGO_SECRET_KEY']:
+    secret_file = secret_path / key
+    if secret_file.exists():
+        with open(secret_file) as f:
+            os.environ[key] = f.read().strip()
+# --- END: Render Secret Files Support ---
 from dotenv import load_dotenv
 load_dotenv()
 import os
