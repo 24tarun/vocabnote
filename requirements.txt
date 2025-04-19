@@ -1,6 +1,6 @@
-gspread
-google-auth-oauthlib
-pandas
+#gspread
+#google-auth-oauthlib
+#pandas
 django
 psycopg2-binary
 gunicorn
