@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <style>
+      body { font-family: Arial, sans-serif; background: #f7f7f7; min-height: 100vh; margin: 0; display: flex; align-items: flex-start; justify-content: center; }
+      .login-card { margin-top: 12vh; }
+      .login-card h2, .login-card h3 { margin-bottom: 1.5rem; color: #111; text-align: center; }
+      .form-group { position: relative; display: flex; align-items: center; margin-bottom: 1rem; }
+      .form-group input { flex: 1; padding: 0.5rem 2.5rem 0.5rem 0.5rem; border: 1px solid #222; border-radius: 6px; background: #fff; color: #111; }
+      .eye-btn { position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 0; display: flex; align-items: center; }
+      #eyeIcon { color: #aaa; font-size: 1.1em; transition: color 0.2s, opacity 0.2s; opacity: 0.6; }
+      #eyeIcon.active { color: #111; opacity: 1; }
+      button[type="submit"] { width: auto; min-width: 0; padding: 0; background: none; color: #111; border: none; border-radius: 0; font-size: 1em; margin-top: 0.5rem; display: block; margin-left: auto; margin-right: auto; transition: text-decoration 0.2s; text-decoration: underline; }
+      button[type="submit"]:hover { background: none; color: #111; cursor: pointer; text-decoration: none; }
+      .login-links { margin-top: 1rem; text-align: center; }
+      .login-links a { color: #111; text-decoration: none; margin: 0 0.5rem; }
+      .login-links a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+<div class="login-card">
+  <h3>VocabNote</h3>
+  <form method="post">
+    {% csrf_token %}
+    <div class="form-group">
+      <input type="text" name="username" placeholder="Username" required>
+    </div>
+    <div class="form-group">
+      <input type="password" name="password" id="id_password" placeholder="Password" required>
+      <button type="button" id="togglePassword" class="eye-btn" tabindex="-1">
+        <span id="eyeIcon">👁️</span>
+      </button>
+    </div>
+    <button type="submit">login</button>
+  </form>
+  <div class="login-links">
+    <a href="{% url 'signup' %}">Register</a> |
+    <a href="/admin/">Admin</a>
+  </div>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const pwdInput = document.getElementById('id_password');
+    const toggleBtn = document.getElementById('togglePassword');
+    const eyeIcon = document.getElementById('eyeIcon');
+    toggleBtn?.addEventListener('click', e => {
+      e.preventDefault();
+      const isPwd = pwdInput.type === 'password';
+      pwdInput.type = isPwd ? 'text' : 'password';
+      eyeIcon.classList.toggle('active', isPwd);
+    });
+  });
+</script>
+</body>
+</html>

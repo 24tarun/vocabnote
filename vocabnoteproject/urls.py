@@ -15,9 +15,19 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path,include
+from django.urls import path,include, re_path
+from django.shortcuts import redirect
+from django.conf.urls import handler404
+
+# Custom handler for 404 errors
+def redirect_to_login(request, exception=None):
+    return redirect('login')
+
+handler404 = 'vocabnoteproject.urls.redirect_to_login'
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("",include("firstapp.urls")),
+    path('accounts/', include('accounts.urls')),
+    re_path(r'^.*$', lambda request: redirect('login')),
 ]

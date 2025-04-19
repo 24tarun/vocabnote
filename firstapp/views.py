@@ -1,90 +1,113 @@
+# firstapp/views.py
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from .utils import quiz
-import gspread
-from google.oauth2.service_account import Credentials
-from django import forms
+from django.contrib.auth.decorators import login_required
+from .models import VocabItem
+from .forms import VocabItemForm
 import random
 
-# Path to your credentials JSON file
-CREDS_FILE =  "creds.json"
-
-# Define the scope
-SCOPE = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
-
+@login_required
 def options_view(request):
-    return render(request, 'options.html')
-
-
-def get_sheet():
-    creds = Credentials.from_service_account_file(CREDS_FILE, scopes=SCOPE)
-    client = gspread.authorize(creds)
-    sheet = client.open('German words and meanings').sheet1
-    return sheet
-
-class DataEntryForm(forms.Form):
-    Gender = forms.CharField(max_length=10, required=False)
-    Word = forms.CharField(max_length=100)
-    English_Meaning = forms.CharField(max_length=200)
-    Part_of_Speech = forms.CharField(max_length=50, required=False)
-    Other_Comments = forms.CharField(widget=forms.Textarea, required=False)
-
-def enter_data_view(request):
+    user_vocab = VocabItem.objects.filter(user=request.user)
+    form = VocabItemForm()
     if request.method == 'POST':
-        form = DataEntryForm(request.POST)
-        if form.is_valid():
-            sheet = get_sheet()
-            gender = form.cleaned_data['Gender']
-            word = form.cleaned_data['Word']
-            english_meaning = form.cleaned_data['English_Meaning']
-            part_of_speech = form.cleaned_data['Part_of_Speech']
-            other_comments = form.cleaned_data['Other_Comments']
-            
-            # Append the new row to the sheet
-            sheet.append_row([gender, word, english_meaning, part_of_speech, other_comments])
-            
-            return redirect('success')
+        if 'add_word' in request.POST:
+            form = VocabItemForm(request.POST)
+            if form.is_valid():
+                vocab = form.save(commit=False)
+                vocab.user = request.user
+                vocab.save()
+                return redirect('options')
+        elif 'delete_last' in request.POST:
+            last_vocab = user_vocab.order_by('-id').first()
+            if last_vocab:
+                last_vocab.delete()
+            return redirect('options')
     else:
-        form = DataEntryForm()
-    
-    return render(request, 'enter_data.html', {'form': form})
+        form = VocabItemForm()
+    user_vocab = VocabItem.objects.filter(user=request.user)
+    return render(request, 'options.html', {'user_vocab': user_vocab, 'form': form})
 
+@login_required
+def enter_data_view(request):
+    user_vocab = VocabItem.objects.filter(user=request.user)
+    if request.method == 'POST':
+        form = VocabItemForm(request.POST)
+        if form.is_valid():
+            vocab = form.save(commit=False)
+            vocab.user = request.user
+            vocab.save()
+            form = VocabItemForm()  # reset the form after successful add
+            user_vocab = VocabItem.objects.filter(user=request.user)  # refresh vocab list
+            return render(request, 'options.html', {'user_vocab': user_vocab, 'form': form})
+    else:
+        form = VocabItemForm()
+    return render(request, 'options.html', {'user_vocab': user_vocab, 'form': form})
+
+@login_required
 def quiz_view(request):
+    vocabs = list(VocabItem.objects.filter(user=request.user))
+    if not vocabs:
+        return render(request, 'quiz.html', {'score': None, 'total': 0, 'questions': None})
+
     if request.method == 'POST':
         if 'num_questions' in request.POST:
-            # Handle the number of questions selection
-            num_questions = int(request.POST.get('num_questions', 2))  # Default to 2 questions
-            return redirect(f'/quiz/?num_questions={num_questions}')  # Redirect to the same view with the number of questions
+            try:
+                num_questions = int(request.POST.get('num_questions', 1))
+            except ValueError:
+                num_questions = 1
+            num_questions = max(1, num_questions)
+            # Repeat vocab words if needed to reach num_questions
+            if len(vocabs) < num_questions:
+                questions = []
+                while len(questions) < num_questions:
+                    needed = num_questions - len(questions)
+                    random.shuffle(vocabs)
+                    questions.extend(vocabs[:needed])
+            else:
+                questions = random.sample(vocabs, num_questions)
+            return render(request, 'quiz.html', {'questions': questions, 'score': None, 'total': num_questions})
+        else:
+            questions = request.POST.getlist('questions')
+            answers_gender = request.POST.getlist('answers_gender')
+            answers_english_meaning = request.POST.getlist('answers_english_meaning')
+            answers_part_of_speech = request.POST.getlist('answers_part_of_speech')
+            answers_other_comments = request.POST.getlist('answers_other_comments')
+            correct_gender = request.POST.getlist('correct_gender')
+            correct_english_meaning = request.POST.getlist('correct_english_meaning')
+            correct_part_of_speech = request.POST.getlist('correct_part_of_speech')
+            correct_other_comments = request.POST.getlist('correct_other_comments')
+            score = 0
+            results = []
+            for idx in range(len(questions)):
+                user_gender = answers_gender[idx].strip().lower()
+                user_meaning = answers_english_meaning[idx].strip().lower()
+                user_pos = answers_part_of_speech[idx].strip().lower()
+                user_comments = answers_other_comments[idx].strip().lower()
+                corr_gender = (correct_gender[idx] or '').strip().lower()
+                corr_meaning = (correct_english_meaning[idx] or '').strip().lower()
+                corr_pos = (correct_part_of_speech[idx] or '').strip().lower()
+                corr_comments = (correct_other_comments[idx] or '').strip().lower()
+                # Only require gender and english meaning to be correct
+                correct = (user_gender == corr_gender and user_meaning == corr_meaning)
+                score += int(correct)
+                results.append({
+                    'word': questions[idx],
+                    'user_gender': user_gender,
+                    'user_meaning': user_meaning,
+                    'user_pos': user_pos,
+                    'user_comments': user_comments,
+                    'corr_gender': corr_gender,
+                    'corr_meaning': corr_meaning,
+                    'corr_pos': corr_pos,
+                    'corr_comments': corr_comments,
+                    'correct': correct
+                })
+            return render(request, 'quiz.html', {
+                'score': score,
+                'total': len(questions),
+                'results': results,
+                'questions': None
+            })
 
-        # Process the submitted answers
-        answers = request.POST.getlist('answers')
-        correct_answers = request.POST.getlist('correct_answers')
-        questions = request.POST.getlist('questions')
-        
-        # Calculate the score
-        score = sum(1 for answer, correct in zip(answers, correct_answers) if answer.strip().lower() == correct.strip().lower())
-        
-        # Prepare data for rendering
-        results = zip(questions, answers, correct_answers)  # Combine questions, answers, and correct answers
-        return render(request, 'quiz.html', {'score': score, 'total': len(correct_answers), 'results': results})
-
-    # If it's a GET request, show the quiz form
-    num_questions = int(request.GET.get('num_questions', 0))  # Default to 0 questions
-    questions = []
-
-    if num_questions > 0:
-        data = get_sheet().get_all_records()
-        # Prepare questions with correct answers
-        questions = random.sample(data, min(num_questions, len(data)))
-        for question in questions:
-            question['correct_answer'] = question['English Meaning']  # Add a new key for the correct answer
-
-    return render(request, 'quiz.html', {'questions': questions, 'num_questions': num_questions})
-
-def success_view(request):
-    return HttpResponse("Operation was successful!")
-
-def success_view(request):
-    return render(request, 'success.html')
-
-
+    # GET request: ask for number of questions
+    return render(request, 'quiz.html', {'questions': None, 'score': None, 'total': 0, 'vocab_count': len(vocabs)})

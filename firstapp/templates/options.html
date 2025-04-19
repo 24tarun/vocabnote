@@ -2,14 +2,84 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Choose an Option</title>
+    <title>Options</title>
+    <style>
+      body { font-family: Arial, sans-serif; background: #f7f7f7; min-height: 100vh; margin: 0; display: flex; align-items: flex-start; justify-content: center; }
+      .options-main { margin-top: 12vh; width: 100%; max-width: 520px; padding: 0 1rem; }
+      h3 { margin-bottom: 1.5rem; color: #111; text-align: center; font-size: 1.17em; font-weight: bold; }
+      h2 { margin-top: 0; margin-bottom: 22px; font-weight: normal; font-size: 1.08rem; color: #111; text-align: center; }
+      .navigation-menu ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; align-items: center; }
+      .navigation-menu li { width: 100%; text-align: center; }
+      .navigation-menu a { color: #111; text-decoration: underline; font-size: 1em; }
+      .navigation-menu a:hover { text-decoration: none; }
+      .side-by-side-form { display: flex; flex-direction: column; gap: 0.6rem; align-items: center; }
+      .form-row { display: flex; flex-direction: column; width: 100%; }
+      label { margin-bottom: 0.2rem; color: #222; }
+      input, select, textarea { border: 1px solid #222; border-radius: 6px; padding: 0.5rem 0.5rem; font-size: 1rem; width: 100%; box-sizing: border-box; color: #111; background: #fff; }
+      button[type="submit"] { width: auto; min-width: 0; padding: 0; background: none; color: #111; border: none; border-radius: 0; font-size: 1em; margin-top: 0.5rem; display: block; margin-left: auto; margin-right: auto; transition: text-decoration 0.2s; text-decoration: underline; }
+      button[type="submit"]:hover { background: none; color: #111; cursor: pointer; text-decoration: none; }
+      table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
+      th, td { border: 1px solid #222; padding: 0.4rem 0.7rem; text-align: left; }
+      th { background: #f0f0f0; color: #111; }
+      td { background: #fff; color: #111; }
+      .no-vocab { text-align: center; color: #888; }
+    </style>
 </head>
 <body>
-    <h1>What would you like to do?</h1>
-    <ul>
-        <li><a href="{% url 'enter_data' %}">Enter Data</a></li>
-        <li><a href="{% url 'quiz' %}">Go to Quiz Mode</a></li>
-    </ul>
+    <div class="options-main">
+        <h3>VocabNote</h3>
+        <!-- <h2>What would you like to do?</h2> -->
+        <nav class="navigation-menu">
+            <ul>
+                <li><a href="{% url 'quiz' %}">Start a Quiz</a></li>
+            </ul>
+        </nav>
+        <h2>Add New Vocabulary</h2>
+        <form method="post" class="side-by-side-form">
+            {% csrf_token %}
+            {% for field in form.visible_fields %}
+                <div class="form-row">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                </div>
+            {% endfor %}
+            <button type="submit" name="add_word">Add</button>
+        </form>
+        <form method="post" class="side-by-side-form" style="margin-top:14px;">
+            {% csrf_token %}
+            <button type="submit" name="delete_last">Delete Last Word</button>
+        </form>
+        <h2 style="margin-top:18px;">Your Vocabulary Entries</h2>
+        {% if user_vocab %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Word</th>
+                        <th>English Meaning</th>
+                        <th>Gender</th>
+                        <th>Part of Speech</th>
+                        <th>Other Comments</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for vocab in user_vocab %}
+                    <tr>
+                        <td>{{ vocab.word }}</td>
+                        <td>{{ vocab.english_meaning }}</td>
+                        <td>{{ vocab.gender }}</td>
+                        <td>{{ vocab.part_of_speech }}</td>
+                        <td>{{ vocab.other_comments }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="no-vocab">No vocabulary entries yet.</p>
+        {% endif %}
+        <form action="{% url 'logout' %}" method="post" style="margin-top:18px;">
+            {% csrf_token %}
+            <button type="submit">Logout</button>
+        </form>
+    </div>
 </body>
 </html>

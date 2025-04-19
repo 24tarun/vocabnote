@@ -1,43 +1,79 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Quiz</title>
+    <style>
+      body { font-family: Arial, sans-serif; background: #f7f7f7; min-height: 100vh; margin: 0; display: flex; align-items: flex-start; justify-content: center; }
+      .quiz-main { margin-top: 12vh; width: 100%; max-width: 520px; padding: 0 1rem; }
+      h3, h2 { color: #111; text-align: center; font-weight: normal; }
+      h2 { font-size: 1.17em; margin-bottom: 1.4rem; }
+      h3 { font-size: 1.05em; margin-bottom: 1.1rem; }
+      form { display: flex; flex-direction: column; gap: 1.2rem; align-items: center; }
+      .question-block { width: 100%; display: flex; flex-direction: column; align-items: flex-start; margin-bottom: 1rem; }
+      .question-block strong { color: #111; }
+      input[type="text"] { border: 1px solid #222; border-radius: 6px; padding: 0.5rem 0.5rem; font-size: 1rem; width: 100%; box-sizing: border-box; color: #111; background: #fff; margin-top: 0.4rem; }
+      button[type="submit"] { width: auto; min-width: 0; padding: 0; background: none; color: #111; border: none; border-radius: 0; font-size: 1em; margin-top: 0.5rem; display: block; margin-left: auto; margin-right: auto; transition: text-decoration 0.2s; text-decoration: underline; }
+      button[type="submit"]:hover { background: none; color: #111; cursor: pointer; text-decoration: none; }
+      ul { color: #111; margin: 1.2rem 0; padding-left: 1.2rem; }
+      a { color: #111; text-decoration: underline; font-size: 1em; display: block; text-align: center; margin: 0.7rem 0; }
+      a:hover { text-decoration: none; }
+      p { color: #888; text-align: center; }
+    </style>
 </head>
 <body>
-    <h1>Take a Quiz</h1>
-
+  <div class="quiz-main">
+    <h3>VocabNote</h3>
+    <h2>Quiz Mode</h2>
     {% if score is none %}
-        <form method="post">
-            {% csrf_token %}
-            <label for="num_questions">How many questions do you want to answer?</label>
-            <input type="number" id="num_questions" name="num_questions" min="1" required>
-            <button type="submit">Start Quiz</button>
-        </form>
+        {% if not questions %}
+            <form method="post" style="margin-bottom:1.5rem;">
+                {% csrf_token %}
+                <label for="num_questions" style="display:block;text-align:center;margin-bottom:0.7rem;color:#222;">How many words do you want to be quizzed on?</label>
+                <input type="number" id="num_questions" name="num_questions" min="1" max="999" value="{{ vocab_count|default:1 }}" style="width:90px;text-align:center;margin:0 auto 1.1rem auto;display:block;">
+                <button type="submit">Start Quiz</button>
+            </form>
+            <p style="margin-top:0.5rem;">You have {{ vocab_count|default:0 }} word{{ vocab_count|default:0|pluralize }} in your vocabulary.</p>
+        {% else %}
+            <form method="post">
+                {% csrf_token %}
+                {% for question in questions %}
+                    <div class="question-block">
+                        <strong>{{ forloop.counter }}. {{ question.word }}</strong>
+                        <input type="hidden" name="questions" value="{{ question.word }}">
+                        <input type="hidden" name="correct_gender" value="{{ question.gender }}">
+                        <input type="hidden" name="correct_english_meaning" value="{{ question.english_meaning }}">
+                        <input type="hidden" name="correct_part_of_speech" value="{{ question.part_of_speech }}">
+                        <input type="hidden" name="correct_other_comments" value="{{ question.other_comments }}">
+                        <input type="text" name="answers_gender" placeholder="Gender (required)" style="margin-bottom:0.4em;">
+                        <input type="text" name="answers_english_meaning" placeholder="English Meaning (required)" style="margin-bottom:0.4em;">
+                        <input type="text" name="answers_part_of_speech" placeholder="Part of Speech (optional)" style="margin-bottom:0.4em;color:#666;">
+                        <input type="text" name="answers_other_comments" placeholder="Other Comments (optional)">
+                    </div>
+                {% endfor %}
+                <button type="submit">Submit Answers</button>
+            </form>
+        {% endif %}
     {% else %}
-        <h2>Your Score: {{ score }} out of {{ total }}</h2>
+        <h3>Your Score: {{ score }} / {{ total }}</h3>
         <h3>Your Answers:</h3>
         <ul>
-            {% for question, answer, correct in results %}
+            {% for result in results %}
                 <li>
-                    The correct answer for "{{ question }}" is "{{ correct }}".
+                    <strong>{{ result.word }}</strong><br>
+                    Gender: {{ result.user_gender }} (correct: {{ result.corr_gender }})<br>
+                    English Meaning: {{ result.user_meaning }} (correct: {{ result.corr_meaning }})<br>
+                    Part of Speech: {{ result.user_pos }} (correct: {{ result.corr_pos }})<br>
+                    {% if result.user_comments or result.corr_comments %}
+                        Other Comments: {{ result.user_comments }} (correct: {{ result.corr_comments }})<br>
+                    {% endif %}
+                    {% if result.correct %}✔ Correct{% else %}✘ Incorrect{% endif %}
                 </li>
             {% endfor %}
         </ul>
+        <a href="{% url 'quiz' %}">Try Again</a>
     {% endif %}
-
-    {% if questions %}
-        <form method="post">
-            {% csrf_token %}
-            {% for question in questions %}
-                <div>
-                    <label for="question_{{ forloop.counter }}">What is the meaning of "{{ question.Word }}"?</label>
-                    <input type="text" id="question_{{ forloop.counter }}" name="answers" required>
-                    <input type="hidden" name="correct_answers" value="{{ question.correct_answer }}">
-                    <input type="hidden" name="questions" value="{{ question.Word }}">
-                </div>
-            {% endfor %}
-            <button type="submit">Submit</button>
-        </form>
-    {% endif %}
+    <a href="{% url 'options' %}">Back to Options</a>
+  </div>
 </body>
 </html>
