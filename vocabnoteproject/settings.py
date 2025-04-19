@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 import os
-from posix import truncate
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -39,9 +38,11 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'fallback-insecure-key')
 DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'vocabnote.onrender.com','https://vocabnote.onrender.com']
-CSRF_TRUSTED_ORIGINS = ['localhost', '127.0.0.1','https://vocabnote.onrender.com']
-
-
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost',
+    'http://127.0.0.1',
+    'https://vocabnote.onrender.com'
+]
 
 # Application definition
 
