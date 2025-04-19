@@ -4,3 +4,4 @@
 django
 psycopg2-binary
 gunicorn
+python-dotenv
