@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 import os
+from posix import truncate
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -35,9 +36,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'fallback-insecure-key')
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'vocabnote.onrender.com']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'vocabnote.onrender.com','https://vocabnote.onrender.com']
+CSRF_TRUSTED_ORIGINS = ['localhost', '127.0.0.1','https://vocabnote.onrender.com']
+
 
 
 # Application definition
