@@ -21,7 +21,7 @@
 </head>
 <body>
 <div class="login-card">
-  <h3>VocabNote</h3>
+  <h2>VocabNote</h2>
   <form method="post">
     {% csrf_token %}
     <div class="form-group">
@@ -38,6 +38,10 @@
   <div class="login-links">
     <a href="{% url 'signup' %}">Register</a> |
     <a href="/admin/">Admin</a>
+  </div>
+  <div class="login-links" style="margin-top: 0.7rem;">
+    Made by <a href="https://www.linkedin.com/in/tarun2k01/" target="_blank" rel="noopener" style="color: #111; text-decoration: underline;">Tarun Hariharan</a>,
+    <a href="https://github.com/24tarun" target="_blank" rel="noopener" style="color: #111; text-decoration: underline;">github</a>
   </div>
 </div>
 <script>
