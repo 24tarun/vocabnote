@@ -7,5 +7,4 @@ urlpatterns = [
     path('', RedirectView.as_view(url=reverse_lazy('login'), permanent=False)),
     path('options/', views.options_view, name='options'),
     path('enter_data/', views.enter_data_view, name='enter_data'),
-    path('quiz/', views.quiz_view, name='quiz'),
 ]

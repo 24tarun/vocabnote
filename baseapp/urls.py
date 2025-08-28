@@ -13,5 +13,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("",include("firstapp.urls")),
     path('accounts/', include('accounts.urls')),
+    path('quiz/', include('quizapp.urls')),
     re_path(r'^.*$', lambda request: redirect('login')),
 ]
