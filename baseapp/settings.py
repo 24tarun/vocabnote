@@ -1,6 +1,6 @@
 
 import os
-
+import certifi
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -84,13 +84,22 @@ WSGI_APPLICATION = 'baseapp.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('dbname', 'defaultdbname'),
-        'USER': os.environ.get('user', 'defaultpostgresuser'),
-        'PASSWORD': os.environ.get('password', ''),
-        'HOST': os.environ.get('host', ''),
-        'PORT': os.environ.get('port', '6543'),
+        'NAME': os.environ.get('DB_NAME', ''),
+        'USER': os.environ.get('DB_USER', ''),
+        'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+        'HOST': os.environ.get('DB_HOST', ''),
+        'PORT': os.environ.get('DB_PORT', ''),
+        'OPTIONS': {
+            'sslmode': 'require',
+            'sslrootcert': certifi.where()
+        }
     }
 }
+
+#SUPABASE CONFIGURATION
+SUPABASE_URL = os.environ.get('SUPABASE_URL')
+SUPABASE_KEY = os.environ.get('SUPABASE_KEY')  # For client-side
+SUPABASE_SERVICE_KEY = os.environ.get('SUPABASE_SERVICE_KEY')  # For server-side
 
 
 # Password validation
