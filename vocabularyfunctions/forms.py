@@ -1,4 +1,4 @@
-# firstapp/forms.py
+# vocabularyfunctions/forms.py
 from django import forms
 from .models import VocabItem
 

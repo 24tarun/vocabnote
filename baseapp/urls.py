@@ -11,7 +11,7 @@ handler404 = 'baseapp.urls.redirect_to_login'
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("",include("firstapp.urls")),
+    path("",include("vocabularyfunctions.urls")),
     path('accounts/', include('accounts.urls')),
     path('quiz/', include('quizapp.urls')),
     re_path(r'^.*$', lambda request: redirect('login')),
