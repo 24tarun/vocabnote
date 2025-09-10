@@ -1,5 +1,6 @@
 import os
 import certifi
+from pathlib import Path
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -7,7 +8,7 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Environment: controls DB selection (supabase | local_sqlite)
-DJANGO_ENV = os.environ.get('DJANGO_ENV', 'local_sqlite') #defaults to local_sqlite
+DJANGO_DB_CHOICE = os.environ.get('DJANGO_DB_CHOICE', 'local_sqlite') #defaults to local_sqlite
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -36,7 +37,6 @@ INSTALLED_APPS = [
     'vocabularyfunctions',
     'accounts',
     'baseapp',
-    'vocabularyfunctions',
     'quizapp',
 ]
 
@@ -74,7 +74,7 @@ WSGI_APPLICATION = 'baseapp.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-if DJANGO_ENV == 'local_sqlite':
+if DJANGO_DB_CHOICE == 'local_sqlite':
     # local db sqlite
     DATABASES = {
         'default': {
@@ -82,7 +82,7 @@ if DJANGO_ENV == 'local_sqlite':
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
-elif DJANGO_ENV == 'supabase':
+elif DJANGO_DB_CHOICE == 'supabase':
     # supabase
     DATABASES = {
         'default': {
