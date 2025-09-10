@@ -1,22 +1,13 @@
-
 import os
 import certifi
 from dotenv import load_dotenv
 load_dotenv()
 
-# --- BEGIN: Render Secret Files Support ---
-from pathlib import Path
-secret_path = Path('/etc/secrets')
-for key in ['DB_NAME', 'DB_USER', 'DB_PASSWORD', 'DB_HOST', 'DB_PORT', 'DJANGO_SECRET_KEY']:
-    secret_file = secret_path / key
-    if secret_file.exists():
-        with open(secret_file) as f:
-            os.environ[key] = f.read().strip()
-# --- END: Render Secret Files Support ---
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Environment: controls DB selection (supabase | local_sqlite)
+DJANGO_ENV = os.environ.get('DJANGO_ENV', 'local_sqlite') #defaults to local_sqlite
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -44,6 +35,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'vocabularyfunctions',
     'accounts',
+    'baseapp',
+    'vocabularyfunctions',
     'quizapp',
 ]
 
@@ -81,20 +74,30 @@ WSGI_APPLICATION = 'baseapp.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME', ''),
-        'USER': os.environ.get('DB_USER', ''),
-        'PASSWORD': os.environ.get('DB_PASSWORD', ''),
-        'HOST': os.environ.get('DB_HOST', ''),
-        'PORT': os.environ.get('DB_PORT', ''),
-        'OPTIONS': {
-            'sslmode': 'require',
-            'sslrootcert': certifi.where()
+if DJANGO_ENV == 'local_sqlite':
+    # local db sqlite
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
-}
+elif DJANGO_ENV == 'supabase':
+    # supabase
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('DB_NAME', ''),
+            'USER': os.environ.get('DB_USER', ''),
+            'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+            'HOST': os.environ.get('DB_HOST', ''),
+            'PORT': os.environ.get('DB_PORT', ''),
+            'OPTIONS': {
+                'sslmode': 'require',
+                'sslrootcert': certifi.where()
+            }
+        }
+    }
 
 #SUPABASE CONFIGURATION
 SUPABASE_URL = os.environ.get('SUPABASE_URL')
